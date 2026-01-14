@@ -260,6 +260,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Checkbox validation
+            const interests = contactForm.querySelectorAll('input[name="interest"]:checked');
+            if (interests.length === 0) {
+                e.preventDefault();
+                alert('Por favor, seleccione al menos una opción de interés (Proyecto Actual o Futuros Proyectos).');
+                return;
+            }
+
             alert('¡Formulario enviado con éxito!');
         });
     }
