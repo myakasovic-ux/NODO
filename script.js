@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, observerOptions);
 
     // Elements to reveal
-    const revealElements = document.querySelectorAll('.model-card, .section-header, .project-info, .project-visual, .footer-cta, .timeline-progress');
+    const revealElements = document.querySelectorAll('.model-card, .section-header, .project-info, .project-visual, .footer-cta, .timeline-progress, .footer-calculator');
 
     revealElements.forEach(el => {
         if (el.classList.contains('timeline-progress')) {
@@ -160,5 +160,64 @@ document.addEventListener('DOMContentLoaded', () => {
         let calculatedDv = res === 11 ? '0' : res === 10 ? 'K' : res.toString();
 
         return dv === calculatedDv;
+    }
+
+    // Mortgage Calculator Logic
+    const calcMonto = document.getElementById('calc-monto');
+    const calcPie = document.getElementById('calc-pie');
+    const calcTasa = document.getElementById('calc-tasa');
+    const calcAnos = document.getElementById('calc-anos');
+
+    const valMonto = document.getElementById('val-monto');
+    const valPie = document.getElementById('val-pie');
+    const valTasa = document.getElementById('val-tasa');
+    const valAnos = document.getElementById('val-anos');
+    const valDividendo = document.getElementById('val-dividendo');
+    const valClp = document.getElementById('val-clp');
+
+    function calculateMortgage() {
+        if (!calcMonto || !calcPie || !calcTasa || !calcAnos) return;
+
+        const monto = parseFloat(calcMonto.value);
+        const piePct = parseFloat(calcPie.value);
+        const tasaAnual = parseFloat(calcTasa.value);
+        const anos = parseInt(calcAnos.value);
+
+        // Update display values
+        valMonto.textContent = monto.toLocaleString('es-CL');
+        valPie.textContent = piePct;
+        valTasa.textContent = tasaAnual;
+        valAnos.textContent = anos;
+
+        // Calculations
+        const principal = monto * (1 - piePct / 100);
+        const tasaMensual = (tasaAnual / 100) / 12;
+        const totalPagos = anos * 12;
+
+        let dividendo = 0;
+        if (tasaMensual > 0) {
+            dividendo = principal * (tasaMensual * Math.pow(1 + tasaMensual, totalPagos)) / (Math.pow(1 + tasaMensual, totalPagos) - 1);
+        } else {
+            dividendo = principal / totalPagos;
+        }
+
+        valDividendo.textContent = dividendo.toFixed(2);
+
+        // CLP Conversion
+        const ufString = document.querySelector('.uf-value')?.textContent || '';
+        const ufMatch = ufString.match(/\$[\d\.]+/);
+        if (ufMatch) {
+            const ufValue = parseFloat(ufMatch[0].replace('$', '').replace(/\./g, ''));
+            const dividendoClp = Math.round(dividendo * ufValue);
+            valClp.textContent = `$${dividendoClp.toLocaleString('es-CL')}`;
+        }
+    }
+
+    if (calcMonto) {
+        [calcMonto, calcPie, calcTasa, calcAnos].forEach(input => {
+            input.addEventListener('input', calculateMortgage);
+        });
+        // Initial calculation
+        calculateMortgage();
     }
 });
