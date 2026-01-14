@@ -214,6 +214,20 @@
                         title="Formato válido: 12.345.678-9 o 12345678-9" required>
                     <input type="email" placeholder="Tu correo electrónico" required>
 
+                    <div class="form-row-extra">
+                        <div class="calc-input-group">
+                            <label>Sueldo Líquido</label>
+                            <input type="range" id="user-salary" min="1000000" max="5000000" step="200000"
+                                value="1000000">
+                            <div class="calc-value"><span id="val-salary">$1.000.000 - $1.200.000</span></div>
+                        </div>
+
+                        <div class="calc-input-group">
+                            <label>Celular</label>
+                            <input type="tel" id="user-phone" value="+56 9 " placeholder="+56 9 1234 5678" required>
+                        </div>
+                    </div>
+
                     <div class="form-options">
                         <label class="checkbox-container">
                             <input type="checkbox" name="interest" value="actual">

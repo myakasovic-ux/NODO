@@ -972,6 +972,46 @@ section {
     }
 }
 
+.form-row-extra {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    width: 100%;
+    margin: 1rem 0 2rem;
+    text-align: left;
+}
+
+.form-row-extra .calc-input-group {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1.5rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-row-extra input[type="tel"] {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-family: inherit;
+    outline: none;
+    transition: all var(--transition-fast);
+}
+
+.form-row-extra input[type="tel"]:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent-alt);
+}
+
+@media (max-width: 768px) {
+    .form-row-extra {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
 .social-links {
     display: flex;
     justify-content: center;

@@ -90,18 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
-            const rawRut = rutInput.value.replace(/[^\dkK]/g, '');
-            if (!validateRut(rawRut)) {
-                e.preventDefault();
-                alert('El RUT ingresado no es válido. Por favor, revíselo.');
-                rutInput.focus();
-            } else {
-                alert('¡Formulario enviado con éxito!');
-            }
-        });
-    }
 
     // Map Modal Logic
     const wazeBtn = document.getElementById('btn-waze');
@@ -219,5 +207,60 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         // Initial calculation
         calculateMortgage();
+    }
+
+    // New Form Fields Logic (Salary and Phone)
+    const salaryInput = document.getElementById('user-salary');
+    const salaryValue = document.getElementById('val-salary');
+    const phoneInput = document.getElementById('user-phone');
+
+    if (salaryInput && salaryValue) {
+        salaryInput.addEventListener('input', () => {
+            const val = parseInt(salaryInput.value);
+            const step = 200000;
+            if (val >= 5000000) {
+                salaryValue.textContent = '+$5.000.000';
+            } else {
+                const nextVal = val + step;
+                salaryValue.textContent = `$${val.toLocaleString('es-CL')} - $${nextVal.toLocaleString('es-CL')}`;
+            }
+        });
+    }
+
+    if (phoneInput) {
+        // Prevent deleting the prefix if desired, or just validate
+        phoneInput.addEventListener('input', (e) => {
+            let value = e.target.value;
+            // Ensure it starts with +
+            if (!value.startsWith('+')) {
+                value = '+' + value.replace(/[^\d]/g, '');
+            }
+            e.target.value = value;
+        });
+    }
+
+    // Update Contact Form Submit to include new validations
+    if (contactForm) {
+        contactForm.addEventListener('submit', (e) => {
+            const rawRut = rutInput.value.replace(/[^\dkK]/g, '');
+            const phoneVal = phoneInput?.value || '';
+            const digitsOnly = phoneVal.replace(/[^\d]/g, '');
+
+            if (!validateRut(rawRut)) {
+                e.preventDefault();
+                alert('El RUT ingresado no es válido. Por favor, revíselo.');
+                rutInput.focus();
+                return;
+            }
+
+            if (digitsOnly.length < 11) {
+                e.preventDefault();
+                alert('Por favor, ingrese un número de celular válido (9 dígitos después del código de Chile).');
+                phoneInput.focus();
+                return;
+            }
+
+            alert('¡Formulario enviado con éxito!');
+        });
     }
 });
