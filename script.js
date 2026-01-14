@@ -263,4 +263,21 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('¡Formulario enviado con éxito!');
         });
     }
+
+    // WhatsApp Close Functionality
+    const whatsappClose = document.getElementById('whatsapp-close');
+    const whatsappContainer = document.getElementById('whatsapp-container');
+
+    if (whatsappClose && whatsappContainer) {
+        whatsappClose.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent any accidental link triggers
+            e.stopPropagation();
+            whatsappContainer.style.display = 'none';
+        });
+
+        // Show the close button after 5 seconds
+        setTimeout(() => {
+            whatsappClose.classList.add('show-close');
+        }, 5000);
+    }
 });
