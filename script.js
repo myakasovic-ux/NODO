@@ -10,6 +10,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Global-ish state for the session
+    let currentUFValue = 39750; // Default fallback
+
+    // Fetch UF Value
+    async function fetchUF() {
+        try {
+            const response = await fetch('https://mindicador.cl/api/uf');
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            currentUFValue = data.serie[0].valor;
+            const ufDisplay = document.getElementById('uf-value-display');
+            if (ufDisplay) {
+                // Style the number with Chilean format for display
+                const formattedUF = new Intl.NumberFormat('es-CL', {
+                    style: 'currency',
+                    currency: 'CLP',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(currentUFValue);
+
+                ufDisplay.textContent = formattedUF;
+
+                // Trigger mortgage calculation update after UF is fetched
+                if (typeof calculateMortgage === 'function') {
+                    calculateMortgage();
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching UF:', error);
+            // Fallback: show the default value if fetch fails
+            const ufDisplay = document.getElementById('uf-value-display');
+            if (ufDisplay) {
+                const formattedUF = new Intl.NumberFormat('es-CL', {
+                    style: 'currency',
+                    currency: 'CLP',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(currentUFValue);
+                ufDisplay.textContent = formattedUF;
+            }
+        }
+    }
+
+    fetchUF();
+
     // Reveal Animations using Intersection Observer
     const observerOptions = {
         threshold: 0.15,
@@ -44,31 +89,188 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Project Image Toggle Interaction
-    const projectVisual = document.querySelector('.project-visual');
-    const indicator = projectVisual?.querySelector('.image-indicator');
-    const tipologiasBtn = document.getElementById('btn-tipologias');
+    // Scroll Spy for Header Navigation
+    const sections = document.querySelectorAll('section[id], .footer-calculator[id], footer[id]');
+    const navLinks = document.querySelectorAll('.main-nav a[href^="#"]');
 
-    function toggleProjectImage() {
-        if (!projectVisual || !indicator) return;
-        const isShowingSecondary = projectVisual.classList.toggle('show-secondary');
-        indicator.textContent = isShowingSecondary
-            ? 'Click para volver a vista'
-            : 'Hacer click para ver plano';
+    function updateActiveLink() {
+        let currentSectionId = '';
+        const scrollPosition = window.scrollY + window.innerHeight / 3;
+
+        // Check if we are at the bottom of the page
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 50) {
+            currentSectionId = 'contact';
+        } else {
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollPosition >= sectionTop) {
+                    currentSectionId = section.getAttribute('id');
+                }
+            });
+        }
+
+        navLinks.forEach(link => {
+            link.classList.toggle('active-link', link.getAttribute('href') === `#${currentSectionId}`);
+        });
     }
 
-    if (projectVisual) {
-        projectVisual.addEventListener('click', toggleProjectImage);
+    window.addEventListener('scroll', updateActiveLink);
+    updateActiveLink(); // Run once on load
+
+    // Project Carousel Logic
+    const tipologiasBtn = document.getElementById('btn-tipologias');
+    const indicatorBtn = document.getElementById('btn-fullscreen-view');
+    const imageModal = document.getElementById('image-modal');
+    const modalImageDisplay = document.getElementById('modal-image-display');
+    const arrowPrev = document.getElementById('carousel-prev');
+    const arrowNext = document.getElementById('carousel-next');
+    const closeImageModal = document.querySelector('.close-image-modal');
+
+    // Group elements
+    const groupExterior = document.querySelector('.group-exterior');
+    const groupInterior = document.querySelector('.group-interior');
+
+    // State
+    let isShowingInterior = false;
+
+    // Carousel Navigation Function
+    function navigateCarousel(direction) {
+        // Determine active group container
+        const activeGroup = isShowingInterior ? groupInterior : groupExterior;
+        const images = activeGroup.querySelectorAll('.carousel-img');
+
+        let activeIndex = 0;
+        images.forEach((img, index) => {
+            if (img.classList.contains('active')) activeIndex = index;
+        });
+
+        // Calculate new index
+        let newIndex = activeIndex + direction;
+        if (newIndex >= images.length) newIndex = 0;
+        if (newIndex < 0) newIndex = images.length - 1;
+
+        // Update classes
+        images[activeIndex].classList.remove('active');
+        images[newIndex].classList.add('active');
+    }
+
+    if (arrowPrev && arrowNext) {
+        arrowPrev.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navigateCarousel(-1);
+        });
+        arrowNext.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navigateCarousel(1);
+        });
+    }
+
+    // Toggle Groups (Exterior / Interior)
+    function toggleProjectMode() {
+        if (!groupExterior || !groupInterior || !tipologiasBtn) return;
+
+        isShowingInterior = !isShowingInterior;
+
+        if (isShowingInterior) {
+            groupExterior.classList.remove('active');
+            groupInterior.classList.add('active');
+            tipologiasBtn.textContent = 'Ver Vista';
+        } else {
+            groupInterior.classList.remove('active');
+            groupExterior.classList.add('active');
+            tipologiasBtn.textContent = 'Ver tipologías';
+        }
     }
 
     if (tipologiasBtn) {
-        tipologiasBtn.addEventListener('click', toggleProjectImage);
+        tipologiasBtn.addEventListener('click', toggleProjectMode);
+    }
+
+    // Logic for "Ver en grande" (Fullscreen Modal) to use ACTIVE image in ACTIVE group
+    const modalPrev = document.getElementById('modal-prev');
+    const modalNext = document.getElementById('modal-next');
+    let currentModalImages = [];
+    let currentModalIndex = 0;
+
+    function updateModalImage() {
+        if (currentModalImages.length > 0 && modalImageDisplay) {
+            modalImageDisplay.src = currentModalImages[currentModalIndex].src;
+        }
+    }
+
+    if (indicatorBtn && imageModal && modalImageDisplay) {
+        indicatorBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            // Find currently active group and images
+            const activeGroup = isShowingInterior ? groupInterior : groupExterior;
+            // Get all images in the active group to populate the modal carousel
+            const images = activeGroup.querySelectorAll('.carousel-img');
+            currentModalImages = Array.from(images);
+
+            // Find index of currently active image
+            const activeImg = activeGroup.querySelector('.carousel-img.active');
+            currentModalIndex = currentModalImages.indexOf(activeImg);
+            if (currentModalIndex === -1) currentModalIndex = 0; // Fallback
+
+            updateModalImage();
+
+            imageModal.style.display = 'flex';
+            void imageModal.offsetWidth;
+            imageModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    }
+
+    // Modal Arrow Listeners
+    if (modalPrev && modalNext) {
+        modalPrev.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentModalImages.length === 0) return;
+            currentModalIndex--;
+            if (currentModalIndex < 0) currentModalIndex = currentModalImages.length - 1;
+            updateModalImage();
+        });
+
+        modalNext.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentModalImages.length === 0) return;
+            currentModalIndex++;
+            if (currentModalIndex >= currentModalImages.length) currentModalIndex = 0;
+            updateModalImage();
+        });
+    }
+
+    const closeImgFunc = () => {
+        if (!imageModal) return;
+        imageModal.classList.remove('active');
+        setTimeout(() => {
+            imageModal.style.display = 'none';
+            if (modalImageDisplay) modalImageDisplay.src = ''; // Clear src
+        }, 400);
+        document.body.style.overflow = 'auto';
+    };
+
+    if (closeImageModal) {
+        closeImageModal.addEventListener('click', closeImgFunc);
+    }
+
+    if (imageModal) {
+        imageModal.addEventListener('click', (e) => {
+            if (e.target === imageModal || e.target.classList.contains('image-modal-content')) {
+                closeImgFunc();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && imageModal.classList.contains('active')) {
+                closeImgFunc();
+            }
+        });
     }
 
     // RUT Formatting and Validation
     const rutInput = document.getElementById('user-rut');
-    const contactForm = document.getElementById('contact-form');
-
     if (rutInput) {
         rutInput.addEventListener('input', (e) => {
             let value = e.target.value.replace(/[^\dkK]/g, '');
@@ -94,15 +296,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // Map Modal Logic
     const wazeBtn = document.getElementById('btn-waze');
     const mapModal = document.getElementById('map-modal');
-    const closeModal = document.querySelector('.close-modal');
+    const mapCloseBtn = mapModal ? mapModal.querySelector('.close-modal') : null;
+    let mapInstance = null;
 
     if (wazeBtn && mapModal) {
         wazeBtn.addEventListener('click', () => {
             mapModal.style.display = 'flex';
-            // Force a reflow to make the transition work
+            // Force a reflow
             void mapModal.offsetWidth;
             mapModal.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            document.body.style.overflow = 'hidden';
+
+            // Initialize Leaflet Map
+            if (!mapInstance && typeof L !== 'undefined') {
+                mapInstance = L.map('map').setView([-33.044796, -71.578108], 19);
+
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }).addTo(mapInstance);
+
+                L.marker([-33.044796, -71.578108]).addTo(mapInstance)
+                    .bindPopup('<b>ADP2</b><br>Proyecto Actual')
+                    .openPopup();
+            }
+
+            // Fix for map rendering in hidden container
+            setTimeout(() => {
+                if (mapInstance) mapInstance.invalidateSize();
+            }, 300);
         });
 
         const closeFunc = () => {
@@ -113,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.overflow = 'auto'; // Restore scrolling
         };
 
-        closeModal?.addEventListener('click', closeFunc);
+        mapCloseBtn?.addEventListener('click', closeFunc);
 
         // Close on background click
         window.addEventListener('click', (e) => {
@@ -192,11 +414,8 @@ document.addEventListener('DOMContentLoaded', () => {
         valDividendo.textContent = dividendo.toFixed(2);
 
         // CLP Conversion
-        const ufString = document.querySelector('.uf-value')?.textContent || '';
-        const ufMatch = ufString.match(/\$[\d\.]+/);
-        if (ufMatch) {
-            const ufValue = parseFloat(ufMatch[0].replace('$', '').replace(/\./g, ''));
-            const dividendoClp = Math.round(dividendo * ufValue);
+        if (currentUFValue > 0) {
+            const dividendoClp = Math.round(dividendo * currentUFValue);
             valClp.textContent = `$${dividendoClp.toLocaleString('es-CL')}`;
         }
     }
