@@ -489,6 +489,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // =========================================================================================
+            // SUGERENCIA PARA BACKEND: Almacenado de datos en Base de Datos (SQL/NoSQL)
+            // =========================================================================================
+            // Actualmente el formulario solo hace un 'alert'. Al hostear el sitio, necesitarás un endpoint.
+            //
+            // OPCIÓN 1: Fetch API a tu propio servidor (Node.js, PHP, Python)
+            // -----------------------------------------------------------------------------------------
+            // e.preventDefault(); // Detienes el envío estándar para manejarlo con JS
+            //
+            // const formData = {
+            //     rut: rawRut,
+            //     email: document.getElementById('user-email').value,
+            //     salaryRange: document.getElementById('val-salary').textContent,
+            //     phone: phoneVal,
+            //     interests: Array.from(interests).map(cb => cb.value),
+            //     timestamp: new Date().toISOString()
+            // };
+            //
+            // fetch('https://tu-dominio.com/api/guardar-lead', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify(formData)
+            // })
+            // .then(response => response.json())
+            // .then(data => {
+            //     alert('Datos guardados correctamente en la base de datos.');
+            //     contactForm.reset();
+            // })
+            // .catch(error => console.error('Error:', error));
+            //
+            // OPCIÓN 2: Usar servicios como EmailJS, Formspree o Google Sheets
+            // -----------------------------------------------------------------------------------------
+            // Son fáciles de integrar si no tienes un backend dedicado.
+            //
+            // OPCIÓN 3: Firebase (Backend as a Service)
+            // -----------------------------------------------------------------------------------------
+            // Importarías las funciones de Firebase y usarías: 
+            // await addDoc(collection(db, "leads"), formData);
+            // =========================================================================================
+
             alert('¡Formulario enviado con éxito!');
         });
     }
@@ -522,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // =========================================================================
 
         // 1. CANTIDAD DE PARTÍCULAS
-        const starCount = 5000; // Cambia este número para más o menos estrellas
+        const starCount = 3000; // Cambia este número para más o menos estrellas
 
         // 2. PATRÓN DE MOVIMIENTO
         // Valor 1: Radial (Actual / Starfield)
@@ -530,8 +570,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Valor 3: Caos Magnético (Movimiento errático y fluido)
         // Valor 4: Pulsar Grupal (Se acercan y alejan en grupos)
         // Valor 5: Agujero Negro (Succión central y aceleración)
-        // Valor 6: Cúmulos Respiratorios (Grupos que se expanden y contraen mientras viajan)
-        const movementPattern = 5;
+        // Valor 6: Cúmulos Nebulares (Movimiento orgánico y fluido)
+        // Valor 7: Combo Aleatorio (Cambia entre patrones 1-6 automáticamente)
+        // Valor 8: Combo Secuencial (Ciclo ordenado del 1 al 6)
+        const movementPattern = 7;
+
+        // 2.1 Intervalo para Pattern x (segundos)
+        const comboSwitchInterval = 3;
 
         // 3. ESQUEMA DE COLOR
         // Valor 1: Starlight (Blanco, Cian, Violeta sutil)
@@ -540,7 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 4. VELOCIDAD GLOBAL
         // Ajusta este valor para acelerar o ralentizar todo el sistema (ej: 0.5, 2, 5)
-        const globalSpeed = 0.5;
+        const globalSpeed = 0.7;
 
         // Parámetros de ajuste fino (ahora dependen de globalSpeed)
         const baseSpeed = 0.2 * globalSpeed;
@@ -563,6 +608,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let isVisible = false;
         let animationFrameId = null;
         let time = 0; // Para movimientos dinámicos y colores
+        let activeSubPattern = 1; // Para el modo Combo (Pattern 7)
+        let lastSwitchTime = Date.now();
 
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -602,36 +649,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.pz = this.z;
                 this.z -= speed * this.speedOffset;
 
-                // Lógica de movimiento según patrón
-                if (movementPattern === 2) {
+                // Determinar patrón efectivo (especialmente para modos Combo 7 y 8)
+                const effectivePattern = (movementPattern === 7 || movementPattern === 8) ? activeSubPattern : movementPattern;
+
+                // Lógica de movimiento según patrón (Escalada por globalSpeed para que el control de velocidad sea total)
+                if (effectivePattern === 2) {
                     // Patrón 2: Espiral
-                    this.angle += 0.005 * (1 - this.z / width);
+                    this.angle += 0.005 * globalSpeed * (1 - this.z / width);
                     this.x = Math.cos(this.angle) * this.radius;
                     this.y = Math.sin(this.angle) * this.radius;
-                } else if (movementPattern === 3) {
+                } else if (effectivePattern === 3) {
                     // Patrón 3: Caos Magnético
-                    this.x += Math.sin(time * 0.02 + this.z * 0.01) * 2;
-                    this.y += Math.cos(time * 0.02 + this.z * 0.01) * 2;
-                } else if (movementPattern === 4) {
+                    this.x += Math.sin(time * 0.02 + this.z * 0.01) * 2 * globalSpeed;
+                    this.y += Math.cos(time * 0.02 + this.z * 0.01) * 2 * globalSpeed;
+                } else if (effectivePattern === 4) {
                     // Patrón 4: Pulsar Grupal (Acercamiento y expansión)
                     const pulse = Math.sin(time * 0.04) * 0.5;
                     const groupEffect = Math.sin(this.angle * 4); // Crea 4 grupos principales
-                    this.x += Math.cos(this.angle) * pulse * groupEffect * 50;
-                    this.y += Math.sin(this.angle) * pulse * groupEffect * 50;
-                } else if (movementPattern === 5) {
+                    this.x += Math.cos(this.angle) * pulse * groupEffect * 50 * globalSpeed;
+                    this.y += Math.sin(this.angle) * pulse * groupEffect * 50 * globalSpeed;
+                } else if (effectivePattern === 5) {
                     // Patrón 5: Agujero Negro (Succión central)
-                    // En este patrón, invertimos la lógica de profundidad (z) para simular succión
-                    const pull = (1 - this.z / width) * 15;
+                    const pull = (1 - this.z / width) * 15 * globalSpeed;
                     this.x -= Math.cos(this.angle) * pull;
                     this.y -= Math.sin(this.angle) * pull;
                     // Rotación creciente al acercarse
-                    this.angle += 0.02 * (1 - this.z / width);
-                } else if (movementPattern === 6) {
+                    this.angle += 0.02 * globalSpeed * (1 - this.z / width);
+                } else if (effectivePattern === 6) {
                     // Patrón 6 REINTERPRETADO: Cúmulos Nebulares (Movimiento Orgánico)
-                    // En lugar de un pulso geométrico, usamos una distorsión de campo 
-                    // que hace que las partículas se agrupen y fluyan como nubes líquidas.
                     const nebulaFrec = 0.002;
-                    const nebulaAmp = 25;
+                    const nebulaAmp = 25 * globalSpeed;
                     this.x += Math.sin(time * 0.01 + this.radius * nebulaFrec) * nebulaAmp;
                     this.y += Math.cos(time * 0.015 + this.angle * 2) * (nebulaAmp * 0.5);
                 }
@@ -696,7 +743,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function loop() {
             if (!isVisible || prefersReducedMotion) return;
-            time++;
+            time += globalSpeed;
+
+            // Lógica de cambio para Pattern 7 (Combo Aleatorio) o Pattern 8 (Secuencial)
+            if (movementPattern === 7 || movementPattern === 8) {
+                const now = Date.now();
+                if (now - lastSwitchTime > comboSwitchInterval * 1000) {
+                    if (movementPattern === 7) {
+                        // Aleatorio
+                        let nextPattern;
+                        do {
+                            nextPattern = Math.floor(Math.random() * 6) + 1;
+                        } while (nextPattern === activeSubPattern);
+                        activeSubPattern = nextPattern;
+                    } else {
+                        // Secuencial (Pattern 8)
+                        activeSubPattern = (activeSubPattern % 6) + 1;
+                    }
+                    lastSwitchTime = now;
+                }
+            }
 
             ctx.globalCompositeOperation = 'source-over';
             ctx.fillStyle = '#111111';

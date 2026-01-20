@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Modificación - Antigravity</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --header-bg: #111;
+            --text-color: #333;
+            --accent-color: #2F80ED;
+            --code-bg: #e0e0e0;
+            --card-bg: #fff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--header-bg);
+            color: #fff;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+            color: #111;
+        }
+
+        .file-ref {
+            display: inline-block;
+            background-color: #111;
+            color: #fff;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: monospace;
+            margin-bottom: 1rem;
+        }
+
+        .code-block {
+            background-color: var(--code-bg);
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            overflow-x: auto;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .line-ref {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        .note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>MANUAL DE MODIFICACIÓN</h1>
+        <p>Proyecto ANTIGRAVITY | Guía Técnica</p>
+    </header>
+
+    <div class="container">
+
+        <!-- 1. UBICACIÓN DEL MAPA -->
+        <div class="section-card">
+            <h2>1. Ubicación del Mapa Interactivo</h2>
+            <p>Para cambiar las coordenadas que muestra el mapa al hacer clic en el botón "Maps".</p>
+
+            <span class="file-ref">Archivo: script.js</span>
+
+            <p>Busca aproximadamente la <span class="line-ref">línea 314</span> dentro de la lógica del mapa.</p>
+
+            <div class="code-block">
+                // Cambia los números dentro de user coordinates: [latitud, longitud]<br>
+                mapInstance = L.map('map').setView([<strong>-33.044796, -71.578108</strong>], 16);
+            </div>
+
+            <div class="note">
+                <strong>Tip:</strong> Puedes obtener estas coordenadas desde Google Maps haciendo clic derecho en un
+                lugar y seleccionando los números que aparecen.
+            </div>
+        </div>
+
+        <!-- 2. PARAMETROS DE ANIMACIÓN -->
+        <div class="section-card">
+            <h2>2. Parámetros de Animación (Partículas Warp)</h2>
+            <p>Para modificar el comportamiento, cantidad, colores y patrones de la animación de fondo en la sección
+                "Modelo".</p>
+
+            <span class="file-ref">Archivo: script.js</span>
+
+            <p>La configuración se encuentra al inicio de la función <code>initWarpAnimation</code>, aprox. <span
+                    class="line-ref">línea 521</span>.</p>
+
+            <div class="code-block">
+                // 1. CANTIDAD DE PARTÍCULAS<br>
+                const starCount = <strong>5000</strong>; <br><br>
+
+                // 2. PATRÓN DE MOVIMIENTO<br>
+                // 1: Radial | 2: Espiral | 3: Caos | 4: Pulsar | 5: Agujero Negro | 6: Nebulosa<br>
+                const movementPattern = <strong>5</strong>;<br><br>
+
+                // 3. ESQUEMA DE COLOR<br>
+                // 1: Starlight | 2: Dinámico<br>
+                const colorScheme = <strong>2</strong>;<br><br>
+
+                // 4. VELOCIDAD GLOBAL<br>
+                const globalSpeed = <strong>0.5</strong>;
+            </div>
+            <p>Simplemente cambia los números resaltados para alterar radicalmente el efecto visual.</p>
+        </div>
+
+        <!-- 3. FOTOS DEL CARRUSEL -->
+        <div class="section-card">
+            <h2>3. Fotos del Carrusel de Proyecto</h2>
+            <p>Para agregar, quitar o cambiar las imágenes que se muestran en la sección "Proyecto Actual".</p>
+
+            <span class="file-ref">Archivo: index.html</span>
+
+            <p>Ubica el contenedor <code>.carousel-track</code> alrededor de la <span class="line-ref">línea 219</span>.
+            </p>
+
+            <div class="code-block">
+                &lt;!-- GRUPO 1: Renders Exteriores --&gt;<br>
+                &lt;div class="image-group group-exterior active"&gt;<br>
+                &nbsp;&nbsp;&lt;img src="<strong>assets/images/A1.jpg</strong>" class="carousel-img active"&gt;<br>
+                &nbsp;&nbsp;&lt;!-- Agrega más líneas &lt;img&gt; aquí para más fotos --&gt;<br>
+                &lt;/div&gt;<br><br>
+
+                &lt;!-- GRUPO 2: Planos / Interiores --&gt;<br>
+                &lt;div class="image-group group-interior"&gt;<br>
+                &nbsp;&nbsp;&lt;img src="<strong>assets/images/interior.png</strong>" class="carousel-img
+                active"&gt;<br>
+                &lt;/div&gt;
+            </div>
+
+            <div class="note">
+                Asegúrate de que las nuevas imágenes estén guardadas en la carpeta <code>assets/images/</code>.
+            </div>
+        </div>
+
+        <!-- 4. CALCULADORA HIPOTECARIA -->
+        <div class="section-card">
+            <h2>4. Valores por Defecto (Calculadora)</h2>
+            <p>Para modificar los valores iniciales con los que carga la calculadora (Monto, Tasa, Años).</p>
+
+            <span class="file-ref">Archivo: index.html</span>
+
+            <p>Busca la sección de la calculadora alrededor de la <span class="line-ref">línea 430</span>.</p>
+
+            <div class="code-block">
+                &lt;!-- Monto Propiedad (UF) --&gt;<br>
+                &lt;input type="number" id="calc-monto" value="<strong>2800</strong>" ...&gt;<br><br>
+
+                &lt;!-- Tasa Anual (%) --&gt;<br>
+                &lt;input type="number" id="calc-tasa" value="<strong>4.2</strong>" ...&gt;<br><br>
+
+                &lt;!-- Plazo (Años) --&gt;<br>
+                &lt;input type="range" id="calc-anos" value="<strong>25</strong>" ...&gt;
+            </div>
+        </div>
+
+        <!-- 5. BACKEND / FORMULARIO -->
+        <div class="section-card">
+            <h2>5. Conexión de Formulario a Base de Datos</h2>
+            <p>Guía para conectar el formulario de contacto a un servidor real.</p>
+
+            <span class="file-ref">Archivo: script.js</span>
+            <p>Ver bloque comentado en <span class="line-ref">línea 492</span>.</p>
+
+            <span class="file-ref">Archivo: index.html</span>
+            <p>Ver comentario (backend integration) en <span class="line-ref">línea 360</span> sobre la etiqueta
+                <code>&lt;form&gt;</code>.</p>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
