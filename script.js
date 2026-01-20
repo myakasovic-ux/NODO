@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, observerOptions);
 
     // Elements to reveal
-    const revealElements = document.querySelectorAll('.model-card, .section-header, .project-info, .project-visual, .footer-cta, .timeline-progress, .footer-calculator');
+    const revealElements = document.querySelectorAll('.reveal, .timeline-progress');
 
     revealElements.forEach(el => {
         if (el.classList.contains('timeline-progress')) {
@@ -118,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateActiveLink(); // Run once on load
 
     // Project Carousel Logic
+    const contactForm = document.getElementById('contact-form');
     const tipologiasBtn = document.getElementById('btn-tipologias');
     const indicatorBtn = document.getElementById('btn-fullscreen-view');
     const imageModal = document.getElementById('image-modal');
@@ -307,9 +308,10 @@ document.addEventListener('DOMContentLoaded', () => {
             mapModal.classList.add('active');
             document.body.style.overflow = 'hidden';
 
-            // Initialize Leaflet Map
+            // Initialize Leaflet Map (MAPA OPENSTREET)
             if (!mapInstance && typeof L !== 'undefined') {
-                mapInstance = L.map('map').setView([-33.044796, -71.578108], 19);
+                // Initialize map with coordinates. Change the latitude and longitude values here to update the map location.
+                mapInstance = L.map('map').setView([-33.044796, -71.578108], 16);
 
                 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
