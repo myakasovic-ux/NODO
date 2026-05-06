@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensaje Recibido | LOMAS DEL MAUCO</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #070707;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            position: relative;
+        }
+
+        /* Container for the mesh canvas */
+        .mesh-section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            /* Ensure it covers everything */
+        }
+
+        .mesh-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Content Container */
+        .success-content {
+            position: relative;
+            z-index: 2;
+            padding: 60px 40px;
+            max-width: 600px;
+            background: rgba(7, 7, 7, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            border: 1px solid rgba(137, 188, 68, 0.2);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
+            animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(137, 188, 68, 0.1);
+            color: #89bc44;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            border: 1px solid rgba(137, 188, 68, 0.3);
+        }
+
+        h1 {
+            color: #89bc44;
+            font-size: 2.8rem;
+            margin: 0;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+        }
+
+        p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.15rem;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .btn-home {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 16px 45px;
+            background: #89bc44;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            transition: all 0.4s ease;
+            box-shadow: 0 15px 30px rgba(137, 188, 68, 0.2);
+        }
+
+        .btn-home:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(137, 188, 68, 0.3);
+            filter: brightness(1.1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="mesh-section">
+        <canvas class="mesh-canvas"></canvas>
+    </div>
+
+    <div class="success-content">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <h1>¡Mensaje Recibido!</h1>
+        <p>Gracias por tu interés en LOMAS DEL MAUCO.<br>
+            Nos contactaremos contigo a la brevedad para brindarte toda la información que necesitas.</p>
+        <a href="./" class="btn-home">Volver al Inicio</a>
+    </div>
+
+    <script>
+        // Limpiar URL: Mostrar /formulario_enviado en lugar de /formulario_enviado.html
+        if (window.location.pathname.endsWith('formulario_enviado.html')) {
+            window.history.replaceState(null, '', 'formulario_enviado');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // CODIGO.txt INJECTED CONTENT
+            (function initMeshGradient() {
+                const canvases = document.querySelectorAll('.mesh-canvas');
+                if (canvases.length === 0) return;
+
+                // =========================================================================
+                // CONFIGURACIÓN PARA EL USUARIO
+                // =========================================================================
+
+                // 1. VELOCIDAD DE MOVIMIENTO (Recomendado: 0.05 - 0.2 para minimalismo puro)
+                const moveSpeed = 0.1;
+
+                // 2. PATRONES DE MOVIMIENTO
+                // Valor 1: Orgánico (Movimiento tipo fluido suave)
+                // Valor 2: Orbital (Giro lento en diferentes radios)
+                // Valor 3: Ondulante (Movimiento vertical y horizontal suave)
+                // Valor 4: Células (División y fusión orgánica)
+                // Valor 5: Lámpara de Lava (Ascenso y descenso fluido)
+                const movementPattern = 5;
+
+                // 3. TAMAÑO DE LAS FORMAS (Relativo al tamaño de la pantalla)
+                const shapeSizeMultiplier = 0.5;
+
+                // 4. CANTIDAD DE FORMAS
+                const shapeCount = 10;
+
+                // 5. INTENSIDAD/VELOCIDAD DE TRANSICIÓN DE COLORES (0 a 1)
+                const colorTransitionSpeed = 0.8;
+
+                // 6. NITIDEZ DE LOS BORDES (0.0 = Muy difuminado, 1.0 = Círculo sólido)
+                const edgeSharpness = 0.2;
+
+                // =========================================================================
+
+                // Colores base para la transición
+                // Colores base para la transición (LOMAS DEL MAUCO - GREEN THEME)
+                const colorPalette = [
+                    ['#070707', '#1a3300', '#0a1a00'], // Set 1: Deep Greens
+                    ['#070707', '#89bc44', '#4d6b26'], // Set 2: Brand Green
+                    ['#1a3300', '#4d6b26', '#070707']  // Set 3: Forest Greens
+                ];
+
+                class GradientPoint {
+                    constructor(index, width, height) {
+                        this.index = index;
+                        this.baseSize = (Math.random() * 600 + 400) * shapeSizeMultiplier;
+                        this.colorIndex = Math.floor(Math.random() * 3);
+                        this.reset(width, height);
+                    }
+
+                    reset(width, height) {
+                        this.x = Math.random() * width;
+                        this.y = Math.random() * height;
+                        this.size = this.baseSize;
+                        this.color = colorPalette[0][this.index % 3];
+                        this.vx = (Math.random() - 0.5) * moveSpeed;
+                        this.vy = (Math.random() - 0.5) * moveSpeed;
+                        this.angle = Math.random() * Math.PI * 2;
+                        this.radius = Math.random() * 150 + 100;
+                    }
+
+                    update(time, allPoints, width, height) {
+                        // Dinámica de color: Transición suave entre colores de la paleta
+                        const t = (time * 0.001 * colorTransitionSpeed) + this.index;
+                        const setIndex = Math.floor(t % colorPalette.length);
+                        const nextSetIndex = (setIndex + 1) % colorPalette.length;
+                        const lerpFactor = t % 1;
+
+                        this.color = this.interpolateColor(
+                            colorPalette[setIndex][this.index % 3],
+                            colorPalette[nextSetIndex][this.index % 3],
+                            lerpFactor
+                        );
+
+                        if (movementPattern === 1) {
+                            // Orgánico
+                            this.x += this.vx;
+                            this.y += this.vy;
+
+                            if (this.x < -this.size) this.x = width + this.size;
+                            if (this.x > width + this.size) this.x = -this.size;
+                            if (this.y < -this.size) this.y = height + this.size;
+                            if (this.y > height + this.size) this.y = -this.size;
+
+                        } else if (movementPattern === 2) {
+                            // Orbital
+                            const orbitX = Math.cos(time * 0.0001 * moveSpeed + this.index * 2) * this.radius;
+                            const orbitY = Math.sin(time * 0.00015 * moveSpeed + this.index * 2) * this.radius;
+                            this.x = (width / 2) + orbitX + (Math.cos(this.index * 2) * width * 0.35);
+                            this.y = (height / 2) + orbitY + (Math.sin(this.index * 2) * height * 0.35);
+
+                        } else if (movementPattern === 3) {
+                            // Ondulante
+                            this.x += Math.sin(time * 0.0003 * moveSpeed + this.index) * 0.3;
+                            this.y += Math.cos(time * 0.0002 * moveSpeed + this.index) * 0.3;
+
+                        } else if (movementPattern === 4) {
+                            // CÉLULAS REDISEÑADAS
+                            allPoints.forEach(p => {
+                                if (p !== this) {
+                                    const dx = p.x - this.x;
+                                    const dy = p.y - this.y;
+                                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                                    if (dist < 500) {
+                                        const force = (500 - dist) * 0.0001 * moveSpeed;
+                                        this.vx += dx * force;
+                                        this.vy += dy * force;
+                                        if (dist < 200) {
+                                            this.size = Math.min(this.baseSize * 1.5, this.size + 1);
+                                        }
+                                    }
+                                }
+                            });
+
+                            const jitter = Math.sin(time * 0.005 + this.index) * 2 * moveSpeed;
+                            this.vx += jitter;
+                            this.vy += jitter;
+
+                            this.vx *= 0.94;
+                            this.vy *= 0.94;
+                            this.x += this.vx;
+                            this.y += this.vy;
+
+                            this.scaleX = 1 + Math.abs(this.vx) * 0.05;
+                            this.scaleY = 1 + Math.abs(this.vy) * 0.05;
+                            this.rotation = Math.atan2(this.vy, this.vx);
+
+                            if (this.x < -this.size) this.x = width + this.size;
+                            if (this.x > width + this.size) this.x = -this.size;
+                            if (this.y < -this.size) this.y = height + this.size;
+                            if (this.y > height + this.size) this.y = -this.size;
+
+                        } else if (movementPattern === 5) {
+                            // LÁMPARA DE LAVA
+                            const heat = Math.sin(time * 0.0002 + this.index) * 0.5 + 0.5;
+                            this.vy -= (0.2 + heat * 0.5) * moveSpeed;
+                            this.vx += Math.sin(time * 0.001 + this.y * 0.01) * 0.1 * moveSpeed;
+
+                            this.vx *= 0.96;
+                            this.vy *= 0.98;
+                            this.x += this.vx;
+                            this.y += this.vy;
+
+                            this.scaleX = 1 - Math.abs(this.vy) * 0.03;
+                            this.scaleY = 1 + Math.abs(this.vy) * 0.1;
+                            this.rotation = Math.atan2(this.vy, this.vx);
+
+                            this.size = this.baseSize * (1 + Math.sin(time * 0.001) * 0.2);
+
+                            if (this.y < -this.size * 2) {
+                                this.y = height + this.size;
+                                this.x = Math.random() * width;
+                                this.vx = (Math.random() - 0.5) * 5;
+                            }
+                        }
+                    }
+
+                    interpolateColor(color1, color2, factor) {
+                        const c1 = color1.startsWith('#') ? color1.slice(1) : color1;
+                        const c2 = color2.startsWith('#') ? color2.slice(1) : color2;
+
+                        const r1 = parseInt(c1.substring(0, 2), 16);
+                        const g1 = parseInt(c1.substring(2, 4), 16);
+                        const b1 = parseInt(c1.substring(4, 6), 16);
+
+                        const r2 = parseInt(c2.substring(0, 2), 16);
+                        const g2 = parseInt(c2.substring(2, 4), 16);
+                        const b2 = parseInt(c2.substring(4, 6), 16);
+
+                        const r = Math.round(r1 + factor * (r2 - r1));
+                        const g = Math.round(g1 + factor * (g2 - g1));
+                        const b = Math.round(b1 + factor * (b2 - b1));
+
+                        return `rgb(${r}, ${g}, ${b})`;
+                    }
+
+                    draw(ctx) {
+                        ctx.save();
+                        ctx.translate(this.x, this.y);
+                        if (movementPattern === 4 || movementPattern === 5) {
+                            ctx.rotate(this.rotation || 0);
+                            ctx.scale(this.scaleX || 1, this.scaleY || 1);
+                        }
+
+                        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
+                        gradient.addColorStop(0, this.color);
+                        if (edgeSharpness > 0) {
+                            gradient.addColorStop(Math.min(0.99, edgeSharpness), this.color);
+                        }
+                        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+                        ctx.fillStyle = gradient;
+                        ctx.globalCompositeOperation = 'screen';
+                        ctx.beginPath();
+                        ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                }
+
+                class MeshInstance {
+                    constructor(canvas) {
+                        this.canvas = canvas;
+                        this.section = canvas.parentElement || canvas.offsetParent;
+                        this.ctx = canvas.getContext('2d');
+                        this.points = [];
+                        this.width = 0;
+                        this.height = 0;
+                        this.isVisible = false;
+                        this.animationFrameId = null;
+
+                        this.resize = this.resize.bind(this);
+                        this.loop = this.loop.bind(this);
+
+                        this.init();
+                    }
+
+                    init() {
+                        const observer = new IntersectionObserver((entries) => {
+                            this.isVisible = entries[0].isIntersecting;
+                            if (this.isVisible) {
+                                this.loop(performance.now());
+                            } else {
+                                cancelAnimationFrame(this.animationFrameId);
+                            }
+                        }, { threshold: 0.1 });
+                        observer.observe(this.section);
+
+                        window.addEventListener('resize', this.resize);
+                        this.resize();
+                    }
+
+                    resize() {
+                        const dpr = window.devicePixelRatio || 1;
+                        this.width = this.section.offsetWidth;
+                        this.height = this.section.offsetHeight;
+
+                        if (this.width === 0 || this.height === 0) return;
+
+                        this.canvas.width = this.width * dpr;
+                        this.canvas.height = this.height * dpr;
+                        this.ctx.scale(dpr, dpr);
+
+                        this.points = [];
+                        for (let i = 0; i < shapeCount; i++) {
+                            this.points.push(new GradientPoint(i, this.width, this.height));
+                        }
+                    }
+
+                    loop(time) {
+                        if (!this.isVisible) return;
+
+                        this.ctx.globalCompositeOperation = 'source-over';
+                        this.ctx.fillStyle = '#070707'; // Match Lomas del Mauco BG
+                        this.ctx.fillRect(0, 0, this.width, this.height);
+
+                        this.points.forEach(point => {
+                            point.update(time, this.points, this.width, this.height);
+                            point.draw(this.ctx);
+                        });
+
+                        this.animationFrameId = requestAnimationFrame(this.loop);
+                    }
+                }
+
+                canvases.forEach(canvas => new MeshInstance(canvas));
+            })();
+        });
+    </script>
+</body>
+
+</html>
