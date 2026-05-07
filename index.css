@@ -748,6 +748,7 @@ nav.scrolled #nav-logo {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    cursor: pointer;
 }
 
 /* Focused layout states */
@@ -1682,6 +1683,38 @@ footer {
     border: 1px solid var(--border-blue);
 }
 
+/* Rotate Phone Hint */
+.rotate-hint {
+    display: none;
+    color: var(--accent);
+    margin-top: 12px;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+}
+
+.rotate-hint .rotate-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.rotate-hint .phone-icon {
+    font-size: 1.6rem;
+}
+
+.rotate-hint .arrow-icon {
+    font-size: 1.2rem;
+    color: var(--accent-light);
+}
+
+@keyframes rotatePhone {
+    0%, 10% { transform: rotate(0deg); }
+    40%, 60% { transform: rotate(-90deg); }
+    90%, 100% { transform: rotate(0deg); }
+}
+
 /* ==========================================================================
    RESPONSIVE
    ========================================================================== */
@@ -1732,6 +1765,15 @@ footer {
 }
 
 @media (max-width: 768px) {
+    .rotate-hint {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .rotate-hint .phone-icon {
+        animation: rotatePhone 2.5s infinite ease-in-out;
+    }
+
     .container {
         padding: 0 20px;
     }
@@ -1757,8 +1799,9 @@ footer {
     .servicio-card {
         padding: 12px 10px !important;
         flex-direction: row !important;
+        flex-wrap: wrap !important;
         align-items: center !important;
-        gap: 10px !important;
+        gap: 5px 10px !important;
         min-width: 0 !important;
         text-align: left !important;
     }
@@ -1775,6 +1818,8 @@ footer {
         font-size: 0.72rem !important;
         line-height: 1.2;
         margin-bottom: 0 !important;
+        flex: 1;
+        min-width: 120px;
     }
 
     .btn-ver-mas {
@@ -1783,6 +1828,7 @@ footer {
         font-size: 0.85rem !important;
         color: var(--accent);
         margin-left: auto;
+        white-space: nowrap;
     }
 
     .servicio-card.open {

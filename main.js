@@ -225,9 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 8. SERVICE CARDS EXPAND ---
     const grid = document.querySelector('.servicios-grid');
-    document.querySelectorAll('.btn-ver-mas').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const card = btn.closest('.servicio-card');
+    document.querySelectorAll('.servicio-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const btn = card.querySelector('.btn-ver-mas');
             const isOpen = card.classList.contains('open');
             
             // Si vamos a abrir esta tarjeta, cerramos cualquier otra que esté abierta
@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Alternar estado de la tarjeta actual
             card.classList.toggle('open');
             const isNowOpen = card.classList.contains('open');
-            btn.textContent = isNowOpen ? 'Cerrar -' : 'Ver +';
+            if (btn) btn.textContent = isNowOpen ? 'Cerrar -' : 'Ver +';
 
             // Alternar estado del grid general para el layout de foco
             if (grid) {
